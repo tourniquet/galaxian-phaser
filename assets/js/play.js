@@ -1,9 +1,6 @@
-let gameState = {
-  preload () {
-    game.load.image('player', 'assets/images/player.png')
-    game.load.image('enemy', 'assets/images/enemy.png')
-    game.load.image('bullet', 'assets/images/laser.png')
-  },
+/* globals game, Phaser */
+
+let playState = {
   create () {
     // set game background color to black
     game.stage.backgroundColor = '#000'
@@ -28,6 +25,10 @@ let gameState = {
     game.physics.enable(this.bullet)
     this.bullet.body.collideWorldBounds = true
 
+    // add sounds
+    this.enemyKill = game.add.audio('enemyKill')
+    this.shoot = game.add.audio('shoot')
+
     // shoot on spacebar
     this.spaceBar = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR)
     this.spaceBar.onDown.add(this.fire, this)
@@ -47,17 +48,22 @@ let gameState = {
     game.physics.arcade.overlap(this.bullet, this.enemy, this.killEnemy, null, this)
   },
   fire () {
+    // hint
+    // if (!this.player.inWorld) {
+    //   this.playerDie();
+    // }
+    // play 'shoot' sound
+    this.shoot.play()
+
     this.bullet.body.velocity.y = 0
 
     // speed of bullet
     this.bullet.body.velocity.y = -400
   },
   killEnemy () {
+    this.enemyKill.play()
+
     this.enemy.kill()
     this.bullet.kill()
   }
 }
-
-let game = new Phaser.Game(800, 400, Phaser.AUTO)
-game.state.add('gameState', gameState)
-game.state.start('gameState')
