@@ -20,10 +20,7 @@ let playState = {
     this.enemy.anchor.setTo(0.5, 0.5)
 
     // create bullet
-    this.bullet = game.add.sprite(this.player.x, this.player.y - 62, 'bullet')
-    this.bullet.anchor.setTo(0.5, 0.5)
-    game.physics.enable(this.bullet)
-    this.bullet.body.collideWorldBounds = true
+    this.createBullet()
 
     // add sounds
     this.enemyKill = game.add.audio('enemyKill')
@@ -41,29 +38,55 @@ let playState = {
 
     if (this.cursors.left.isDown) {
       this.player.body.velocity.x = -150
+      // this.bullet.
     } else if (this.cursors.right.isDown) {
       this.player.body.velocity.x = 150
     }
 
+    // if bullet is not fired, follow player
+    if (this.bullet.body.velocity.y === 0) {
+      this.bullet.x = this.player.x
+    }
+
+    // create bullet
+    if (!this.bullet.alive) {
+      this.createBullet()
+    }
+    // when bullet dissapeaer from game world, create a new bullet
+    this.bullet.events.onOutOfBounds.add(this.createBullet, this)
+
     game.physics.arcade.overlap(this.bullet, this.enemy, this.killEnemy, null, this)
   },
+  createBullet () {
+    // create bullet
+    this.bullet = game.add.sprite(this.player.x, this.player.y - 62, 'bullet')
+    this.bullet.anchor.setTo(0.5, 0.5)
+    game.physics.enable(this.bullet)
+    // this check if bullet it is within world every frame
+    this.bullet.body.collideWorldBounds = true
+    // http://phaser.io/docs/2.6.1/Phaser.Physics.Arcade.Body.html#onWorldBounds
+    // when bullet collide with world bounds, bullet is killed
+    this.bullet.body.onWorldBounds = new Phaser.Signal()
+    this.bullet.body.onWorldBounds.add(this.killBullet, this)
+  },
   fire () {
-    // hint
-    // if (!this.player.inWorld) {
-    //   this.playerDie();
-    // }
-    // play 'shoot' sound
-    this.shoot.play()
+    // play 'shoot' sound if bullet exists and if bullet is not moving
+    if (this.bullet.alive && this.bullet.body.velocity.y === 0) {
+      this.shoot.play()
+    }
 
     this.bullet.body.velocity.y = 0
 
     // speed of bullet
     this.bullet.body.velocity.y = -400
   },
+  killBullet () {
+    this.bullet.kill()
+  },
   killEnemy () {
     this.enemyKill.play()
 
     this.enemy.kill()
-    this.bullet.kill()
+    this.killBullet()
   }
 }
