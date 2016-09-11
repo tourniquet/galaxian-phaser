@@ -1,0 +1,6 @@
+@import 'https://fonts.googleapis.com/css?family=Geo';
+
+.hidden-text {
+  font-family: Geo;
+  visibility: hidden;
+}

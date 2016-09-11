@@ -38,7 +38,6 @@ let playState = {
 
     if (this.cursors.left.isDown) {
       this.player.body.velocity.x = -150
-      // this.bullet.
     } else if (this.cursors.right.isDown) {
       this.player.body.velocity.x = 150
     }
@@ -59,7 +58,7 @@ let playState = {
   },
   createBullet () {
     // create bullet
-    this.bullet = game.add.sprite(this.player.x, this.player.y - 62, 'bullet')
+    this.bullet = game.add.sprite(this.player.x, this.player.y - 42, 'bullet')
     this.bullet.anchor.setTo(0.5, 0.5)
     game.physics.enable(this.bullet)
     // this check if bullet it is within world every frame
@@ -80,11 +79,23 @@ let playState = {
     // speed of bullet
     this.bullet.body.velocity.y = -400
   },
+  createExplosion () {
+    // create explosion animation
+    this.explosion = game.add.sprite(this.bullet.x, this.bullet.y, 'explosion')
+    this.explosion.anchor.setTo(0.5, 0.5)
+    this.explosion.animations.add('explode', [0, 1, 2, 1, 0], 20, false)
+    // http://phaser.io/docs/2.6.2/Phaser.Animation.html#play
+    // play(animation, frameRate, loop, killOnComplete)
+    this.explosion.animations.play('explode', 20, false, true)
+  },
   killBullet () {
     this.bullet.kill()
   },
   killEnemy () {
+    // play sound when bullet collide with enemy
     this.enemyKill.play()
+
+    this.createExplosion()
 
     this.enemy.kill()
     this.killBullet()
